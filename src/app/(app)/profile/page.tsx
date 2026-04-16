@@ -1,4 +1,5 @@
 import { requireClient } from "@/lib/supabase/server";
+import { signOutAction } from "./actions";
 
 export default async function ProfilePage() {
   const supabase = await requireClient();
@@ -36,6 +37,18 @@ export default async function ProfilePage() {
           <dd>{p?.bio ?? "-"}</dd>
         </div>
       </dl>
+
+      <form action={signOutAction} className="mt-10">
+        <button
+          type="submit"
+          className="rounded-md border border-neutral-300 px-4 py-2 text-sm dark:border-neutral-700"
+        >
+          로그아웃
+        </button>
+        <p className="mt-2 text-xs text-neutral-500">
+          이 기기의 자동 인식도 해제돼. 다시 들어오려면 로그인하면 돼.
+        </p>
+      </form>
     </main>
   );
 }
