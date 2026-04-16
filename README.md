@@ -117,6 +117,32 @@ npx supabase gen types typescript --project-id <id> --schema public \
 > ⚠️ Vercel 프로덕션 환경은 파일 시스템이 읽기 전용이라 `/settings` 저장이 실패한다.  
 > 반드시 **Vercel Project Settings → Environment Variables**로 설정해라.
 
+### Supabase 이메일 템플릿 커스터마이즈 (필수)
+
+기본 템플릿은 링크만 제공하거나 코드만 제공하는데, 우리 앱은 **둘 다 지원**한다.
+Dashboard → Authentication → Email Templates 에서 두 템플릿을 수정해야 한다.
+
+**"Confirm signup"** (가입용):
+
+```html
+<h2>whatsir 가입 확인</h2>
+<p>아래 6자리 코드를 앱에 입력하거나, 링크를 클릭해줘:</p>
+<p style="font-size: 28px; letter-spacing: 8px; font-weight: bold;">{{ .Token }}</p>
+<p><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup&next=/meetings">whatsir에서 확인하기</a></p>
+```
+
+**"Magic Link"** (로그인용):
+
+```html
+<h2>whatsir 로그인</h2>
+<p>아래 6자리 코드를 앱에 입력하거나, 링크를 클릭해줘:</p>
+<p style="font-size: 28px; letter-spacing: 8px; font-weight: bold;">{{ .Token }}</p>
+<p><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink&next=/meetings">whatsir에서 로그인</a></p>
+```
+
+**Site URL 설정**도 같은 섹션 (Authentication → URL Configuration) 에서 개발용
+`http://localhost:3000` 과 Vercel 도메인을 둘 다 등록해둬야 링크가 제대로 찍힌다.
+
 ## 배포 (Vercel)
 
 1. Vercel 프로젝트에 이 저장소 연결

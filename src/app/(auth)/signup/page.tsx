@@ -17,7 +17,8 @@ export default async function SignupPage({
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold">가입하기</h1>
         <p className="mt-2 text-sm text-neutral-500">
-          이메일로 일회용 코드가 발송돼. 가입 후에는 이 기기에서 자동 로그인되게 기록할게.
+          이메일로 6자리 코드와 링크를 보내. 코드를 입력하거나 링크를 클릭하면 돼.
+          가입 후에는 이 기기에서 자동 로그인되게 기록할게.
         </p>
         <div className="mt-8">
           <SignupForm returnTo={return_to} />

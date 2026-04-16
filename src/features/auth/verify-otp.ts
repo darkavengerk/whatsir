@@ -1,3 +1,4 @@
+import { resolveDisplayName } from "./display-name";
 import type { Result } from "./signup";
 
 export type VerifyOtpCapable = {
@@ -51,11 +52,11 @@ export async function verifySignupOtp(
   }
 
   const user = data.user;
-  const metaName =
-    typeof user.user_metadata?.display_name === "string"
-      ? (user.user_metadata.display_name as string).trim()
-      : "";
-  const displayName = metaName.length > 0 ? metaName : input.email.split("@")[0];
+  const resolved = resolveDisplayName({
+    email: user.email ?? input.email,
+    metadata: user.user_metadata,
+  });
+  const displayName = resolved.length > 0 ? resolved : input.email.split("@")[0];
 
   const upsert = await deps.upsertProfile({
     id: user.id,
