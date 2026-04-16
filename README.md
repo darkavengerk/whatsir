@@ -87,26 +87,35 @@ RLS는 **"같은 모임 멤버이면 읽을 수 있다"** 가 공통 베이스, 
 
 ## 개발 셋업
 
+서버는 **Supabase 연결 없이도 시작**한다. 미설정 상태에서 `/settings`로 이동해 키 3개를 입력하면 즉시 연결된다.
+
 ```bash
-# 1. Supabase 프로젝트 생성 (클라우드 또는 로컬)
-npx supabase init
-npx supabase start                       # 로컬 docker 스택
-
-# 2. 마이그레이션 적용
-npx supabase db reset                    # 로컬
-# 또는 원격:
-npx supabase db push
-
-# 3. 타입 생성
-npx supabase gen types typescript --local --schema public > src/types/database.ts
-
-# 4. env 설정
-cp .env.example .env.local
-# URL / anon key / service role 채우기
-
-# 5. 실행
+# 1. 개발 서버 시작 (DB 없어도 부팅됨)
+npm install
 npm run dev
+
+# 2. 브라우저에서 http://localhost:3000/settings
+#    - Project URL (https://<id>.supabase.co)
+#    - Publishable (anon) key (sb_publishable_...)
+#    - Service role key (sb_secret_...)
+#    입력 후 저장 → .whatsir/supabase.json 에 기록됨 (gitignored)
+
+# 3. Supabase 대시보드 SQL Editor에서 마이그레이션 실행:
+#    - supabase/migrations/0001_schema.sql
+#    - supabase/migrations/0002_rls.sql
+
+# 4. (선택) 타입 생성
+npx supabase gen types typescript --project-id <id> --schema public \
+  > src/types/database.ts
 ```
+
+### 설정 우선순위
+
+1. **환경변수** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) — 있으면 이게 우선
+2. **설정 파일** (`.whatsir/supabase.json`) — `/settings` 폼이 쓰는 위치
+
+> ⚠️ Vercel 프로덕션 환경은 파일 시스템이 읽기 전용이라 `/settings` 저장이 실패한다.  
+> 반드시 **Vercel Project Settings → Environment Variables**로 설정해라.
 
 ## 배포 (Vercel)
 

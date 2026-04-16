@@ -1,7 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import { requireClient } from "@/lib/supabase/server";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
+  const supabase = await requireClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireClient } from "@/lib/supabase/server";
 import { resolveTerminology, type Terminology } from "@/types/domain";
 
 /**
@@ -14,7 +14,7 @@ export default async function MeetingHomePage({
   params: Promise<{ meetingId: string }>;
 }) {
   const { meetingId } = await params;
-  const supabase = await createClient();
+  const supabase = await requireClient();
 
   const { data: meeting } = await supabase
     .from("meetings")

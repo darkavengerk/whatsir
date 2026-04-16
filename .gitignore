@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# whatsir runtime config (Supabase keys). Must not be committed.
+.whatsir/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

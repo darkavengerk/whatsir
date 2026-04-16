@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { resolveDevice } from "@/lib/auth/device";
@@ -17,7 +18,22 @@ export default async function CheckInPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const admin = createAdminClient();
+
+  const admin = await createAdminClient();
+  if (!admin) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+        <h1 className="text-xl font-bold">아직 준비되지 않았어요</h1>
+        <p className="mt-2 max-w-sm text-sm text-neutral-500">
+          서버가 아직 Supabase에 연결되지 않았거나 service role 키가 없어서 체크인을 처리할 수 없어.
+          주최자에게 알려주세요.
+        </p>
+        <Link href="/settings" className="mt-4 text-xs text-neutral-400 underline">
+          관리자인가요? 설정
+        </Link>
+      </main>
+    );
+  }
 
   const { data: activity } = await admin
     .from("activities")
@@ -59,11 +75,9 @@ export default async function CheckInPage({
 
     // 로그인 상태라면 활동 페이지로, 아니면 공개 랜딩 확인 페이지로.
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
 
-    if (user) {
+    if (data.user) {
       redirect(`/meetings/${row.meeting_id}/activities/${row.id}`);
     }
 

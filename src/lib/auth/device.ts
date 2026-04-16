@@ -16,6 +16,8 @@ import { createAdminClient } from "@/lib/supabase/server";
  *   - 복구 수단: 이메일 OTP로 다시 로그인 후 새 디바이스 등록.
  *   - Supabase 세션과는 독립. 세션 만료 시 exchange 엔드포인트에서
  *     admin API로 새 세션을 굽는 용도로 사용할 수 있음.
+ *   - service role 키가 없으면 admin 조회가 불가. registerDevice는 에러를 던지고
+ *     resolveDevice는 조용히 null을 돌려준다.
  */
 
 export const DEVICE_COOKIE = "whatsir.device";
@@ -47,10 +49,14 @@ export async function registerDevice(params: {
   label?: string;
   userAgent?: string;
 }): Promise<{ token: string; deviceId: string }> {
+  const admin = await createAdminClient();
+  if (!admin) {
+    throw new Error("Supabase service role key가 필요해. /settings에서 입력해줘.");
+  }
+
   const token = randomToken();
   const tokenHash = await sha256Hex(token);
 
-  const admin = createAdminClient();
   const { data, error } = await admin
     .from("devices")
     .insert({
@@ -88,8 +94,10 @@ export async function resolveDevice(): Promise<{ userId: string; deviceId: strin
   const token = cookieStore.get(DEVICE_COOKIE)?.value;
   if (!token) return null;
 
+  const admin = await createAdminClient();
+  if (!admin) return null;
+
   const tokenHash = await sha256Hex(token);
-  const admin = createAdminClient();
   const { data } = await admin
     .from("devices")
     .select("id, user_id, revoked_at")
@@ -119,8 +127,10 @@ export async function revokeCurrentDevice(): Promise<void> {
   cookieStore.delete(DEVICE_COOKIE);
   if (!token) return;
 
+  const admin = await createAdminClient();
+  if (!admin) return;
+
   const tokenHash = await sha256Hex(token);
-  const admin = createAdminClient();
   await admin
     .from("devices")
     .update({ revoked_at: new Date().toISOString() })

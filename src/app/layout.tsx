@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,14 +16,14 @@ export const metadata: Metadata = {
   title: "whatsir",
   description: "오프라인 모임의 사람, 활동, 기록을 이어주는 앱",
   manifest: "/manifest.webmanifest",
-  themeColor: "#0b0b0f",
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: "#0b0b0f",
 };
 
 export default function RootLayout({

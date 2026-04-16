@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireClient } from "@/lib/supabase/server";
 
 /**
  * 활동 상세.
@@ -13,7 +13,7 @@ export default async function ActivityPage({
   params: Promise<{ meetingId: string; activityId: string }>;
 }) {
   const { activityId } = await params;
-  const supabase = await createClient();
+  const supabase = await requireClient();
 
   const { data: activity } = await supabase
     .from("activities")

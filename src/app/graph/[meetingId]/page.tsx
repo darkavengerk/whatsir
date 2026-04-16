@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { requireClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { GraphCanvas } from "./graph-canvas";
 
@@ -14,7 +14,7 @@ export default async function MeetingGraphPage({
   params: Promise<{ meetingId: string }>;
 }) {
   const { meetingId } = await params;
-  const supabase = await createClient();
+  const supabase = await requireClient();
 
   const {
     data: { user },

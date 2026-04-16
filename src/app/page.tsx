@@ -2,12 +2,29 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * 랜딩 페이지. 로그인 된 사용자는 /meetings 로 보내고,
- * 비인증 사용자에게는 간단한 소개와 가입/로그인 버튼만.
- * QR 체크인 링크로 접근하는 경우는 /check-in/[token] 이 처리.
+ * 랜딩 페이지.
+ * Supabase 미설정 상태에서도 접근 가능하며, 그 경우 설정 CTA를 보여준다.
  */
 export default async function Home() {
   const supabase = await createClient();
+
+  if (!supabase) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">whatsir</h1>
+        <p className="mt-4 max-w-md text-neutral-600 dark:text-neutral-400">
+          서버가 아직 데이터베이스에 연결되지 않았어. 먼저 Supabase 설정을 입력해줘.
+        </p>
+        <Link
+          href="/settings"
+          className="mt-10 rounded-full bg-neutral-900 px-6 py-3 text-sm font-medium text-white dark:bg-white dark:text-neutral-900"
+        >
+          설정하러 가기
+        </Link>
+      </main>
+    );
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -44,6 +61,13 @@ export default async function Home() {
           </>
         )}
       </div>
+
+      <Link
+        href="/settings"
+        className="mt-12 text-xs text-neutral-400 underline underline-offset-4"
+      >
+        설정
+      </Link>
     </main>
   );
 }

@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireClient } from "@/lib/supabase/server";
 
 /**
  * 내가 속한 모임 목록.
  * RLS가 meeting_members를 통해 자동으로 필터링해주므로 쿼리가 단순하다.
  */
 export default async function MeetingsPage() {
-  const supabase = await createClient();
+  const supabase = await requireClient();
 
   const { data: memberships } = await supabase
     .from("meeting_members")
