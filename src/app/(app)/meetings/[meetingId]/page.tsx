@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireClient } from "@/lib/supabase/server";
 import { resolveTerminology, type Terminology } from "@/types/domain";
+import { InviteLinkBox } from "./invite-link-box";
 
 /**
  * 모임 홈. 활동 타임라인, 멤버, 주제(주제=게임/책)를 한 화면에 요약.
@@ -18,7 +19,7 @@ export default async function MeetingHomePage({
 
   const { data: meeting } = await supabase
     .from("meetings")
-    .select("id, name, description, terminology")
+    .select("id, name, description, terminology, invite_token")
     .eq("id", meetingId)
     .single();
 
@@ -98,6 +99,20 @@ export default async function MeetingHomePage({
           })}
         </ul>
       </section>
+
+      {(meeting as { invite_token: string | null }).invite_token && (
+        <section className="mt-8">
+          <h2 className="text-sm font-semibold text-neutral-500">초대 링크</h2>
+          <p className="mt-1 text-xs text-neutral-500">
+            이 링크를 공유하면 다른 사람이 이 모임에 가입할 수 있어.
+          </p>
+          <div className="mt-2">
+            <InviteLinkBox
+              token={(meeting as { invite_token: string }).invite_token}
+            />
+          </div>
+        </section>
+      )}
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">{term.topics}</h2>

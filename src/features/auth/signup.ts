@@ -6,7 +6,7 @@ export type SignupInput = {
 };
 
 export type FieldError = {
-  field: "name" | "email";
+  field: "name" | "email" | "nickname";
   message: string;
 };
 

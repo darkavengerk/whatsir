@@ -1,33 +1,40 @@
 import { notFound } from "next/navigation";
 import { requireClient } from "@/lib/supabase/server";
+import { AddTopicForm } from "./add-topic-form";
 
 /**
  * 활동 상세.
  * - 상단: 착석자 뷰 (처음 본 사람 파악용, 디스코드 멤버 리스트 패널 느낌)
- * - 중단: 세부활동 리스트 (독립 노드로 저장, 여기서는 연결만 표시)
- * - 하단: 채팅 (Supabase Realtime 구독)
+ * - 중단: 주제/세부활동 리스트 + 추가 폼
+ * - 하단: 사진/후기/채팅 (다음 단계)
  */
 export default async function ActivityPage({
   params,
 }: {
   params: Promise<{ meetingId: string; activityId: string }>;
 }) {
-  const { activityId } = await params;
+  const { meetingId, activityId } = await params;
   const supabase = await requireClient();
 
   const { data: activity } = await supabase
     .from("activities")
-    .select("id, title, starts_at, location, description, check_in_token")
+    .select("id, meeting_id, title, starts_at, location, description, check_in_token")
     .eq("id", activityId)
     .single();
 
   if (!activity) notFound();
 
-  const { data: attendances } = await supabase
-    .from("attendances")
-    .select("seat_order, user:profiles(id, display_name, avatar_url)")
-    .eq("activity_id", activityId)
-    .order("seat_order", { ascending: true, nullsFirst: false });
+  const [{ data: attendances }, { data: subtopics }] = await Promise.all([
+    supabase
+      .from("attendances")
+      .select("seat_order, user:profiles(id, display_name, avatar_url)")
+      .eq("activity_id", activityId)
+      .order("seat_order", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("activity_subtopics")
+      .select("subtopic:subtopics(id, title, created_at)")
+      .eq("activity_id", activityId),
+  ]);
 
   const row = activity as {
     title: string | null;
@@ -37,6 +44,13 @@ export default async function ActivityPage({
     check_in_token: string | null;
   };
 
+  type Subtopic = { id: string; title: string; created_at: string };
+  const subtopicRows: Subtopic[] = (subtopics ?? []).flatMap((r) => {
+    const s = (r as { subtopic: Subtopic | Subtopic[] | null }).subtopic;
+    if (!s) return [];
+    return Array.isArray(s) ? s : [s];
+  });
+
   return (
     <main className="flex-1 px-4 py-6 sm:px-6">
       <header>
@@ -44,9 +58,7 @@ export default async function ActivityPage({
           {new Date(row.starts_at).toLocaleString("ko-KR")}
           {row.location ? ` · ${row.location}` : ""}
         </div>
-        <h1 className="mt-1 text-2xl font-bold">
-          {row.title ?? "회차"}
-        </h1>
+        <h1 className="mt-1 text-2xl font-bold">{row.title ?? "회차"}</h1>
       </header>
 
       <section className="mt-6">
@@ -55,7 +67,11 @@ export default async function ActivityPage({
         </h2>
         <ul className="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
           {(attendances ?? []).map((a) => {
-            type Profile = { id: string; display_name: string; avatar_url: string | null };
+            type Profile = {
+              id: string;
+              display_name: string;
+              avatar_url: string | null;
+            };
             const rawUser = (a as { user: Profile | Profile[] | null }).user;
             const u = Array.isArray(rawUser) ? rawUser[0] ?? null : rawUser;
             if (!u) return null;
@@ -64,7 +80,11 @@ export default async function ActivityPage({
                 <div className="flex size-14 items-center justify-center rounded-full bg-neutral-200 text-lg font-semibold dark:bg-neutral-800">
                   {u.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={u.avatar_url} alt={u.display_name} className="size-full rounded-full object-cover" />
+                    <img
+                      src={u.avatar_url}
+                      alt={u.display_name}
+                      className="size-full rounded-full object-cover"
+                    />
                   ) : (
                     u.display_name.slice(0, 1)
                   )}
@@ -76,14 +96,36 @@ export default async function ActivityPage({
         </ul>
       </section>
 
-      <section className="mt-8 rounded-lg border border-dashed border-neutral-300 p-4 text-sm text-neutral-500 dark:border-neutral-700">
-        세부활동, 사진, 후기, 채팅은 다음 단계에서 붙입니다.
-        {row.check_in_token && (
-          <div className="mt-2">
-            출석 QR 경로: <code>/check-in/{row.check_in_token}</code>
-          </div>
-        )}
+      <section className="mt-8">
+        <h2 className="text-sm font-semibold text-neutral-500">
+          오늘 한 것 ({subtopicRows.length})
+        </h2>
+        <ul className="mt-2 space-y-2">
+          {subtopicRows.map((s) => (
+            <li
+              key={s.id}
+              className="flex items-center justify-between rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-800"
+            >
+              <span>{s.title}</span>
+              <span className="text-xs text-neutral-500">
+                {new Date(s.created_at).toLocaleTimeString("ko-KR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3">
+          <AddTopicForm meetingId={meetingId} activityId={activityId} />
+        </div>
       </section>
+
+      {row.check_in_token && (
+        <section className="mt-8 rounded-lg border border-dashed border-neutral-300 p-4 text-xs text-neutral-500 dark:border-neutral-700">
+          출석 QR 경로: <code>/check-in/{row.check_in_token}</code>
+        </section>
+      )}
     </main>
   );
 }

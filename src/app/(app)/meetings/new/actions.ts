@@ -7,7 +7,7 @@ import { createMeeting, validateMeetingInput } from "@/features/meetings/create-
 
 export type CreateMeetingState = {
   error?: string;
-  values?: { name?: string; description?: string };
+  values?: { name?: string; description?: string; nickname?: string };
 };
 
 export async function submitCreateMeeting(
@@ -16,10 +16,14 @@ export async function submitCreateMeeting(
 ): Promise<CreateMeetingState> {
   const name = String(formData.get("name") ?? "");
   const description = String(formData.get("description") ?? "");
+  const nickname = String(formData.get("nickname") ?? "");
 
-  const validated = validateMeetingInput({ name, description });
+  const validated = validateMeetingInput({ name, description, nickname });
   if (!validated.ok) {
-    return { error: validated.error.message, values: { name, description } };
+    return {
+      error: validated.error.message,
+      values: { name, description, nickname },
+    };
   }
 
   const supabase = await requireClient();

@@ -33,6 +33,20 @@ export function CreateMeetingForm() {
         />
       </label>
 
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium">내 닉네임 (모임 내)</span>
+        <input
+          name="nickname"
+          defaultValue={state.values?.nickname ?? ""}
+          maxLength={50}
+          placeholder="비워두면 프로필 이름을 써"
+          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+        />
+        <span className="mt-1 block text-xs text-neutral-500">
+          이 모임에서만 표시될 이름. 다른 모임에서는 따로 설정할 수 있어.
+        </span>
+      </label>
+
       {state.error && <p className="text-sm text-red-600">{state.error}</p>}
 
       <button
