@@ -1,24 +1,26 @@
+import { SignupForm } from "./signup-form";
+
 /**
- * 가입 페이지 (MVP 스텁).
- *
- * 실제 플로우 (구현 예정):
- *   1. 이름 + 이메일 입력
- *   2. 이메일로 OTP 발송 (supabase.auth.signInWithOtp)
- *   3. OTP 검증 → auth.users 생성 + profiles insert
- *   4. registerDevice() 호출 → 디바이스 쿠키 발급
- *   5. /meetings 또는 원래 리디렉트 대상으로 이동
+ * 가입 페이지.
+ * 1단계: 이름 + 이메일 → OTP 메일 발송
+ * 2단계: OTP 입력 → 프로필 생성 + 디바이스 등록 → /meetings 또는 return_to
  */
-export default function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ return_to?: string }>;
+}) {
+  const { return_to } = await searchParams;
+
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold">가입하기</h1>
         <p className="mt-2 text-sm text-neutral-500">
-          이메일로 일회용 코드가 발송됩니다. 가입 후에는 이 기기에서 자동 로그인됩니다.
+          이메일로 일회용 코드가 발송돼. 가입 후에는 이 기기에서 자동 로그인되게 기록할게.
         </p>
-        {/* TODO: 이메일/이름 입력 폼 + OTP 검증 단계 */}
-        <div className="mt-8 rounded-lg border border-dashed border-neutral-300 p-6 text-sm text-neutral-500 dark:border-neutral-700">
-          이 화면은 스텁입니다. Supabase auth + email OTP 구현 예정.
+        <div className="mt-8">
+          <SignupForm returnTo={return_to} />
         </div>
       </div>
     </main>
