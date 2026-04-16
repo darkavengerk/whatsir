@@ -23,15 +23,16 @@ export function SignupForm({ returnTo }: { returnTo?: string }) {
     return (
       <form action={action} className="space-y-4">
         <p className="text-sm text-neutral-500">
-          <strong>{state.email}</strong> 로 6자리 코드를 보냈어. 메일을 확인하고 입력해줘.
+          <strong>{state.email}</strong> 로 인증 코드를 보냈어. 메일을 확인하고 입력해줘.
         </p>
         <label className="block text-sm">
           <span className="mb-1 block font-medium">인증 코드</span>
           <input
             name="token"
             inputMode="numeric"
-            pattern="\d{6}"
-            maxLength={6}
+            pattern="\d{4,10}"
+            minLength={4}
+            maxLength={10}
             autoComplete="one-time-code"
             required
             className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm tracking-[0.4em] dark:border-neutral-700 dark:bg-neutral-900"

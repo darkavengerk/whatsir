@@ -33,7 +33,7 @@ export type VerifyOtpError = { message: string };
 export type VerifyOtpValue = { userId: string; displayName: string };
 
 /**
- * OTP 6자리를 검증하고, 성공 시 profiles에 upsert한다.
+ * OTP 숫자 코드를 검증하고, 성공 시 profiles에 upsert한다.
  * display_name은 signInWithOtp 때 user_metadata에 실어 보낸 값을 쓴다.
  * 메타데이터가 비어있으면 이메일의 local-part를 fallback으로 쓴다.
  */

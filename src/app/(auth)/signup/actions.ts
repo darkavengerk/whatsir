@@ -7,6 +7,7 @@ import { registerDevice } from "@/lib/auth/device";
 import { validateSignupInput } from "@/features/auth/signup";
 import { requestSignupOtp } from "@/features/auth/request-otp";
 import { verifySignupOtp } from "@/features/auth/verify-otp";
+import { isValidOtpToken } from "@/features/auth/otp-token";
 
 /**
  * signup은 두 단계 — 이메일+이름 제출 → OTP 입력.
@@ -72,8 +73,8 @@ export async function submitSignupVerify(
   }
 
   const token = String(formData.get("token") ?? "").trim();
-  if (!/^\d{6}$/.test(token)) {
-    return { ...prev, error: "6자리 숫자 코드를 입력해줘." };
+  if (!isValidOtpToken(token)) {
+    return { ...prev, error: "이메일로 받은 숫자 코드를 그대로 입력해줘." };
   }
 
   const supabase = await requireClient();

@@ -7,6 +7,7 @@ import { registerDevice } from "@/lib/auth/device";
 import { validateLoginInput } from "@/features/auth/login";
 import { requestLoginOtp } from "@/features/auth/request-login-otp";
 import { verifyLoginOtp } from "@/features/auth/verify-login-otp";
+import { isValidOtpToken } from "@/features/auth/otp-token";
 
 export type LoginStepState =
   | { step: "request"; error?: string; values?: { email?: string } }
@@ -42,8 +43,8 @@ export async function submitLoginVerify(
   }
 
   const token = String(formData.get("token") ?? "").trim();
-  if (!/^\d{6}$/.test(token)) {
-    return { ...prev, error: "6자리 숫자 코드를 입력해줘." };
+  if (!isValidOtpToken(token)) {
+    return { ...prev, error: "이메일로 받은 숫자 코드를 그대로 입력해줘." };
   }
 
   const supabase = await requireClient();
